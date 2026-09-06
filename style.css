@@ -9,6 +9,7 @@
     --canvas-bg: #ffffff;
     --grid-bg: #f8f9fa;
     --reference-opacity: 0.15;
+    --warning-color: #ff6b00;
 }
 
 [data-theme="dark"] {
@@ -22,6 +23,7 @@
     --canvas-bg: #ffffff;
     --grid-bg: #1a1a1a;
     --reference-opacity: 0.25;
+    --warning-color: #ffa500;
 }
 
 * {
@@ -41,7 +43,7 @@ body {
 
 .header {
     background-color: var(--header-bg);
-    padding: 0 24px;
+    padding: 0 16px;
     height: 56px;
     display: flex;
     justify-content: space-between;
@@ -50,30 +52,68 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    gap: 12px;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     font-size: 1.3rem;
     font-weight: 600;
     color: var(--text-color);
+    flex-shrink: 0;
 }
 
 .logo img {
     border-radius: 8px;
     transition: filter 0.3s;
+    cursor: pointer;
 }
 
 [data-theme="dark"] .logo img {
     filter: brightness(0.8) invert(1);
 }
 
+.logo-text {
+    color: var(--text-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.logo-text:hover {
+    color: var(--accent-color);
+}
+
+.header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.warning-text {
+    font-size: 12px;
+    color: var(--warning-color);
+    font-weight: 600;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
 .header-controls {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .theme-toggle,
@@ -87,6 +127,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     transition: background-color 0.2s;
+    white-space: nowrap;
 }
 
 .theme-toggle:hover {
@@ -181,10 +222,21 @@ body {
     margin: 0 auto;
 }
 
-.setup-screen h1 {
+.main-title-link {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.main-title-link h1 {
     font-size: 2.5rem;
     margin-bottom: 16px;
     font-weight: 700;
+    color: var(--text-color);
+    transition: color 0.2s;
+}
+
+.main-title-link:hover h1 {
+    color: var(--accent-color);
 }
 
 .setup-screen p {
@@ -271,6 +323,11 @@ body {
 
 .start-btn:hover {
     background-color: #0353b8;
+}
+
+.start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .drawing-screen {
@@ -441,6 +498,22 @@ body {
 }
 
 @media (max-width: 768px) {
+    .header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 8px 12px;
+    }
+    
+    .header-center {
+        order: 3;
+        width: 100%;
+        padding: 4px 0;
+    }
+    
+    .warning-text {
+        font-size: 10px;
+    }
+    
     .drawing-container {
         grid-template-columns: 1fr;
     }

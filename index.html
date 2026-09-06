@@ -32,8 +32,13 @@
 <body>
     <header class="header">
         <div class="logo">
-            <img src="favicon.png" alt="LucFont Logo" width="40" height="40" id="headerLogo">
-            <span>LucFont</span>
+            <a href="https://github.com/lucovisa/LucFont" target="_blank">
+                <img src="favicon.png" alt="LucFont Logo" width="40" height="40" id="headerLogo">
+            </a>
+            <a href="https://github.com/lucovisa" target="_blank" class="logo-text">LucFont</a>
+        </div>
+        <div class="header-center">
+            <span class="warning-text">WARNING!!! Refreshing the page will cause data loss</span>
         </div>
         <div class="header-controls">
             <button id="themeToggle" class="theme-toggle">🌙</button>
@@ -64,7 +69,9 @@
 
     <main class="main-content">
         <div id="setupScreen" class="setup-screen">
-            <h1>Draw your own font</h1>
+            <a href="javascript:void(0)" onclick="location.reload()" class="main-title-link">
+                <h1>Draw your own font</h1>
+            </a>
             <p>Select character sets to include</p>
             
             <div class="charset-grid" id="charsetGrid">
