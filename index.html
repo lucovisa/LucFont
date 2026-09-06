@@ -114,7 +114,7 @@
                     <h3>Reference</h3>
                     <div class="reference-char" id="referenceChar">A</div>
                     <p class="reference-hint">Trace over the reference</p>
-                    <button id="backToSetupBtn" class="tool-btn">Back to selection</button>
+                    <button id="backToSetupBtn" class="tool-btn back-btn">← Back</button>
                 </div>
                 
                 <div class="drawing-area">
@@ -141,11 +141,10 @@
             </div>
             
             <div class="navigation-buttons">
-                <button id="prevBtn" class="nav-btn">Previous</button>
-                <button id="skipBtn" class="nav-btn skip-btn">Skip</button>
+                <button id="prevBtn" class="nav-btn">← Previous</button>
+                <button id="skipBtn" class="nav-btn">Skip →</button>
                 <span id="charCounter" class="char-counter">1 / 26</span>
-                <button id="nextBtn" class="nav-btn">Next</button>
-                <button id="finishBtn" class="nav-btn finish-btn" style="display: none;">Finish</button>
+                <button id="nextBtn" class="nav-btn">Next →</button>
             </div>
         </div>
         
@@ -154,13 +153,20 @@
             <p>Download your font</p>
             <div class="fill-empty-option">
                 <p>Replace empty characters with defaults?</p>
-                <button id="fillEmptyYes" class="nav-btn">Yes</button>
+                <button id="fillEmptyYes" class="nav-btn selected-choice">Yes</button>
                 <button id="fillEmptyNo" class="nav-btn">No</button>
             </div>
             <button id="downloadBtn" class="start-btn">Download Font</button>
-            <button id="backToSetupFromDone" class="nav-btn">Create Another Font</button>
+            <button id="backToSetupFromDone" class="nav-btn">← Back to selection</button>
         </div>
     </main>
+
+    <div id="errorModal" class="error-modal">
+        <div class="error-content">
+            <p id="errorMessage">No characters drawn!</p>
+            <button id="errorCloseBtn" class="nav-btn">OK</button>
+        </div>
+    </div>
 
     <input type="file" id="importFile" accept=".font,application/json" style="display: none;">
 

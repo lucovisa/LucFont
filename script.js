@@ -23,6 +23,11 @@ let hasDrawnCurrent = false;
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
 
+function showError(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorModal').classList.add('show');
+}
+
 function initCanvas() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -93,7 +98,7 @@ function startDrawing() {
     }
     
     if (currentCharacters.length === 0) {
-        alert('Select at least one character set');
+        showError('Select at least one character set');
         return;
     }
     
@@ -114,8 +119,8 @@ function showCharacter() {
     document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCharacters.length) * 100}%`;
     
     document.getElementById('prevBtn').style.display = currentIndex === 0 ? 'none' : 'block';
+    document.getElementById('skipBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
     document.getElementById('nextBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
-    document.getElementById('finishBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'block' : 'none';
     
     const hasDrawing = !!localStorage.getItem(`lucfont-char-${char}`);
     hasDrawnCurrent = hasDrawing;
@@ -289,10 +294,9 @@ function importFont() {
                     fontData[char] = characters[char];
                 });
                 
-                alert('Font imported successfully!');
                 showCharacter();
             } catch (error) {
-                alert('Invalid font file');
+                showError('Invalid font file');
             }
         };
         reader.readAsText(file);
@@ -304,7 +308,7 @@ function exportFont() {
     const saved = localStorage.getItem(`lucfont-char-${char}`);
     
     if (!saved) {
-        alert('No drawing for this character');
+        showError('No drawing for this character');
         return;
     }
     
@@ -337,19 +341,15 @@ function skipCharacter() {
 
 function nextCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
-        if (hasDrawnCurrent) {
-            saveCurrentDrawing();
-        }
         currentIndex++;
         showCharacter();
+    } else {
+        finishFont();
     }
 }
 
 function prevCharacter() {
     if (currentIndex > 0) {
-        if (hasDrawnCurrent) {
-            saveCurrentDrawing();
-        }
         currentIndex--;
         showCharacter();
     }
@@ -373,8 +373,8 @@ function downloadFont() {
         }
     });
     
-    if (Object.keys(exportData).length === 0) {
-        alert('No characters drawn!');
+    if (Object.keys(exportData).length === 0 && fillEmptyChoice === 'no') {
+        showError('No characters drawn!');
         return;
     }
     
@@ -423,7 +423,7 @@ function copyAddress(address, btn) {
             btn.disabled = false;
         }, 1500);
     }).catch(() => {
-        alert('Failed to copy');
+        showError('Failed to copy');
     });
 }
 
@@ -479,7 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('skipBtn').addEventListener('click', skipCharacter);
     document.getElementById('nextBtn').addEventListener('click', nextCharacter);
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
-    document.getElementById('finishBtn').addEventListener('click', finishFont);
     document.getElementById('downloadBtn').addEventListener('click', downloadFont);
     document.getElementById('backToSetupFromDone').addEventListener('click', backToSetup);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
@@ -495,6 +494,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fillEmptyChoice = 'no';
         document.getElementById('fillEmptyNo').classList.add('selected-choice');
         document.getElementById('fillEmptyYes').classList.remove('selected-choice');
+    });
+    
+    document.getElementById('errorCloseBtn').addEventListener('click', () => {
+        document.getElementById('errorModal').classList.remove('show');
     });
     
     document.getElementById('brushSize').addEventListener('input', (e) => {

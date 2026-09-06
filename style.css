@@ -10,6 +10,8 @@
     --grid-bg: #f8f9fa;
     --reference-opacity: 0.15;
     --warning-color: #ff0000;
+    --error-bg: #ffffff;
+    --error-border: #ff4444;
 }
 
 [data-theme="dark"] {
@@ -24,6 +26,8 @@
     --grid-bg: #1a1a1a;
     --reference-opacity: 0.25;
     --warning-color: #ff3333;
+    --error-bg: #1a1a1a;
+    --error-border: #ff6666;
 }
 
 * {
@@ -415,6 +419,16 @@ body {
     color: #606060;
 }
 
+.back-btn {
+    background-color: var(--warning-color);
+    color: white;
+    margin-top: auto;
+}
+
+.back-btn:hover {
+    background-color: #cc0000;
+}
+
 .drawing-area {
     background-color: var(--grid-bg);
     border-radius: 12px;
@@ -540,21 +554,12 @@ body {
 }
 
 .skip-btn {
-    background-color: var(--warning-color);
-    color: white;
+    background-color: var(--button-bg);
+    color: var(--text-color);
 }
 
 .skip-btn:hover {
-    background-color: #cc0000;
-}
-
-.finish-btn {
-    background-color: #28a745;
-    color: white;
-}
-
-.finish-btn:hover {
-    background-color: #218838;
+    background-color: var(--button-hover);
 }
 
 .char-counter {
@@ -568,7 +573,7 @@ body {
     text-align: center;
     max-width: 600px;
     margin: 0 auto;
-    padding: 80px 20px;
+    padding: 60px 20px;
 }
 
 .done-screen h1 {
@@ -608,6 +613,52 @@ body {
 .done-screen .start-btn,
 .done-screen > .nav-btn {
     margin: 8px;
+}
+
+.error-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-modal.show {
+    display: flex;
+}
+
+.error-content {
+    background-color: var(--error-bg);
+    border: 2px solid var(--error-border);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp 0.3s;
+}
+
+.error-content p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 @media (max-width: 768px) {
