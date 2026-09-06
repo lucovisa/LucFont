@@ -97,12 +97,10 @@ body {
     color: var(--warning-color);
     font-weight: 700;
     text-align: center;
-    animation: blinkWarning 1s infinite;
 }
 
 .warning-text.hidden {
     display: none;
-    animation: none;
 }
 
 @keyframes blinkWarning {

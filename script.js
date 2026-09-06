@@ -286,10 +286,12 @@ function toggleDonatePanel() {
 
 function copyAddress(address, btn) {
     navigator.clipboard.writeText(address).then(() => {
-        const copiedText = btn.parentElement.querySelector('.copied-text');
-        copiedText.classList.add('show');
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.disabled = true;
         setTimeout(() => {
-            copiedText.classList.remove('show');
+            btn.textContent = originalText;
+            btn.disabled = false;
         }, 1500);
     }).catch(() => {
         alert('Failed to copy');
@@ -353,5 +355,5 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const warningText = document.getElementById('warningText');
         warningText.classList.add('hidden');
-    }, 15000);
+    }, 5000);
 });
