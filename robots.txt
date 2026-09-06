@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lucovisa.github.io/LucFont/sitemap.xml
