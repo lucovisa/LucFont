@@ -5,7 +5,7 @@ const charsets = {
     symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?/~`'
 };
 
-let selectedCharset = 'english';
+let selectedCharsets = new Set();
 let customCharset = '';
 let currentCharacters = [];
 let currentIndex = 0;
@@ -13,6 +13,7 @@ let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 let drawingHistory = [];
+let showReference = true;
 let fontData = {};
 
 const canvas = document.getElementById('drawingCanvas');
@@ -27,32 +28,69 @@ function initCanvas() {
     ctx.lineJoin = 'round';
 }
 
-function selectCharset(charset) {
-    selectedCharset = charset;
-    document.querySelectorAll('.charset-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.charset === charset) {
-            btn.classList.add('active');
-        }
-    });
+function toggleCharset(charset) {
+    const btn = document.querySelector(`[data-charset="${charset}"]`);
     
     if (charset === 'custom') {
-        document.getElementById('customCharsetInput').style.display = 'block';
+        const customInput = document.getElementById('customCharsetInput');
+        if (btn.classList.contains('selected')) {
+            btn.classList.remove('selected');
+            customInput.style.display = 'none';
+            selectedCharsets.delete('custom');
+        } else {
+            btn.classList.add('selected');
+            customInput.style.display = 'block';
+            selectedCharsets.add('custom');
+        }
     } else {
-        document.getElementById('customCharsetInput').style.display = 'none';
+        if (btn.classList.contains('selected')) {
+            btn.classList.remove('selected');
+            selectedCharsets.delete(charset);
+        } else {
+            btn.classList.add('selected');
+            selectedCharsets.add(charset);
+        }
+    }
+    
+    updateStartButton();
+}
+
+function updateStartButton() {
+    const startBtn = document.getElementById('startBtn');
+    if (selectedCharsets.size === 0 && !customCharset) {
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.5';
+    } else {
+        startBtn.disabled = false;
+        startBtn.style.opacity = '1';
     }
 }
 
 function startDrawing() {
-    if (selectedCharset === 'custom') {
+    currentCharacters = [];
+    
+    if (selectedCharsets.has('english')) {
+        currentCharacters = currentCharacters.concat(charsets.english.split(''));
+    }
+    if (selectedCharsets.has('russian')) {
+        currentCharacters = currentCharacters.concat(charsets.russian.split(''));
+    }
+    if (selectedCharsets.has('numbers')) {
+        currentCharacters = currentCharacters.concat(charsets.numbers.split(''));
+    }
+    if (selectedCharsets.has('symbols')) {
+        currentCharacters = currentCharacters.concat(charsets.symbols.split(''));
+    }
+    if (selectedCharsets.has('custom')) {
         customCharset = document.getElementById('customCharset').value.trim();
-        if (!customCharset) {
-            alert('Please enter your custom characters');
-            return;
+        if (customCharset) {
+            currentCharacters = currentCharacters.concat(customCharset.split(''));
         }
-        currentCharacters = customCharset.split('');
-    } else {
-        currentCharacters = charsets[selectedCharset].split('');
+    }
+    
+    if (currentCharacters.length === 0) {
+        alert('Select at least one character set');
+        return;
     }
     
     currentIndex = 0;
@@ -65,6 +103,7 @@ function startDrawing() {
 function showCharacter() {
     const char = currentCharacters[currentIndex];
     document.getElementById('referenceChar').textContent = char;
+    document.getElementById('referenceOverlay').textContent = char;
     document.getElementById('charCounter').textContent = `${currentIndex + 1} / ${currentCharacters.length}`;
     document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCharacters.length) * 100}%`;
     
@@ -167,6 +206,22 @@ function undoLastStroke() {
     }
 }
 
+function toggleReference() {
+    showReference = !showReference;
+    const overlay = document.getElementById('referenceOverlay');
+    const btn = document.getElementById('toggleReferenceBtn');
+    
+    if (showReference) {
+        overlay.classList.remove('hidden');
+        btn.textContent = 'Hide Reference';
+        btn.classList.remove('active');
+    } else {
+        overlay.classList.add('hidden');
+        btn.textContent = 'Show Reference';
+        btn.classList.add('active');
+    }
+}
+
 function nextCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
         saveCurrentDrawing();
@@ -186,15 +241,15 @@ function prevCharacter() {
 function finishFont() {
     saveCurrentDrawing();
     
-    const fontData = {};
+    const exportData = {};
     currentCharacters.forEach(char => {
         const saved = localStorage.getItem(`lucfont-char-${char}`);
         if (saved) {
-            fontData[char] = saved;
+            exportData[char] = saved;
         }
     });
     
-    if (Object.keys(fontData).length === 0) {
+    if (Object.keys(exportData).length === 0) {
         alert('No characters drawn!');
         return;
     }
@@ -202,7 +257,7 @@ function finishFont() {
     const jsonData = JSON.stringify({
         name: 'LucFont Custom',
         version: '1.0',
-        characters: fontData
+        characters: exportData
     }, null, 2);
     
     const blob = new Blob([jsonData], { type: 'application/json' });
@@ -224,9 +279,9 @@ function toggleTheme() {
     document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
 }
 
-function toggleDonateModal() {
-    const modal = document.getElementById('donateModal');
-    modal.classList.toggle('show');
+function toggleDonatePanel() {
+    const panel = document.getElementById('donatePanel');
+    panel.classList.toggle('show');
 }
 
 function copyAddress(address) {
@@ -246,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.charset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            selectCharset(btn.dataset.charset);
+            toggleCharset(btn.dataset.charset);
         });
     });
     
@@ -276,23 +331,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('clearBtn').addEventListener('click', clearCanvas);
     document.getElementById('undoBtn').addEventListener('click', undoLastStroke);
+    document.getElementById('toggleReferenceBtn').addEventListener('click', toggleReference);
     document.getElementById('nextBtn').addEventListener('click', nextCharacter);
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
     document.getElementById('finishBtn').addEventListener('click', finishFont);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-    document.getElementById('donateBtn').addEventListener('click', toggleDonateModal);
-    
-    document.getElementById('closeModal').addEventListener('click', toggleDonateModal);
-    
-    document.getElementById('donateModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('donateModal')) {
-            toggleDonateModal();
-        }
-    });
+    document.getElementById('donateBtn').addEventListener('click', toggleDonatePanel);
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             copyAddress(btn.dataset.address);
         });
     });
+    
+    updateStartButton();
 });

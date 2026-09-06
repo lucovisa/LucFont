@@ -8,6 +8,7 @@
     --button-hover: #e5e5e5;
     --canvas-bg: #ffffff;
     --grid-bg: #f8f9fa;
+    --reference-opacity: 0.15;
 }
 
 [data-theme="dark"] {
@@ -20,6 +21,7 @@
     --button-hover: #3f3f3f;
     --canvas-bg: #ffffff;
     --grid-bg: #1a1a1a;
+    --reference-opacity: 0.25;
 }
 
 * {
@@ -34,6 +36,7 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .header {
@@ -60,6 +63,11 @@ body {
 
 .logo img {
     border-radius: 8px;
+    transition: filter 0.3s;
+}
+
+[data-theme="dark"] .logo img {
+    filter: brightness(0.8) invert(1);
 }
 
 .header-controls {
@@ -91,6 +99,72 @@ body {
 }
 
 .donate-btn:hover {
+    background-color: #0353b8;
+}
+
+.donate-panel {
+    position: fixed;
+    top: 56px;
+    right: -400px;
+    width: 350px;
+    background-color: var(--bg-color);
+    border-left: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0 0 0 12px;
+    padding: 24px;
+    z-index: 99;
+    transition: right 0.3s ease;
+    box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.1);
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+}
+
+.donate-panel.show {
+    right: 0;
+}
+
+.donate-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.crypto-address {
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: var(--grid-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.crypto-address h3 {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+.address {
+    font-size: 0.8rem;
+    word-break: break-all;
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: var(--bg-color);
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.copy-btn {
+    padding: 4px 12px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
     background-color: #0353b8;
 }
 
@@ -145,7 +219,7 @@ body {
     background-color: var(--grid-bg);
 }
 
-.charset-btn.active {
+.charset-btn.selected {
     border-color: var(--accent-color);
     background-color: var(--grid-bg);
     box-shadow: 0 0 0 3px rgba(6, 95, 212, 0.1);
@@ -222,7 +296,7 @@ body {
 
 .drawing-container {
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: 200px 1fr;
     gap: 24px;
     margin-bottom: 32px;
 }
@@ -231,7 +305,7 @@ body {
     background-color: var(--grid-bg);
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    padding: 24px;
+    padding: 16px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -240,21 +314,21 @@ body {
 }
 
 .reference-panel h3 {
-    margin-bottom: 24px;
-    font-size: 1rem;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
     color: #606060;
 }
 
 .reference-char {
-    font-size: 8rem;
+    font-size: 6rem;
     font-weight: bold;
     color: var(--accent-color);
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     line-height: 1;
 }
 
 .reference-hint {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #606060;
 }
 
@@ -269,6 +343,7 @@ body {
     display: flex;
     gap: 8px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .tool-btn {
@@ -287,6 +362,16 @@ body {
     background-color: var(--button-hover);
 }
 
+.tool-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 #drawingCanvas {
     width: 100%;
     height: auto;
@@ -295,6 +380,25 @@ body {
     border-radius: 8px;
     cursor: crosshair;
     touch-action: none;
+}
+
+.reference-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 300px;
+    font-weight: bold;
+    color: #000000;
+    opacity: var(--reference-opacity);
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+.reference-overlay.hidden {
+    opacity: 0;
 }
 
 .navigation-buttons {
@@ -336,129 +440,22 @@ body {
     text-align: center;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s;
-}
-
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background-color: var(--bg-color);
-    border-radius: 12px;
-    padding: 32px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-    animation: slideUp 0.3s;
-}
-
-.close-btn {
-    position: absolute;
-    right: 16px;
-    top: 16px;
-    font-size: 24px;
-    cursor: pointer;
-    color: var(--text-color);
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
-
-.close-btn:hover {
-    opacity: 1;
-}
-
-.modal-content h2 {
-    margin-bottom: 16px;
-    font-size: 1.5rem;
-}
-
-.modal-content > p {
-    margin-bottom: 24px;
-    color: #606060;
-}
-
-.crypto-address {
-    margin-bottom: 20px;
-    padding: 16px;
-    background-color: var(--grid-bg);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.crypto-address h3 {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-    color: var(--accent-color);
-}
-
-.address {
-    font-size: 0.85rem;
-    word-break: break-all;
-    margin-bottom: 12px;
-    padding: 8px;
-    background-color: var(--bg-color);
-    border-radius: 4px;
-    font-family: monospace;
-}
-
-.copy-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 16px;
-    background-color: var(--accent-color);
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.copy-btn:hover {
-    background-color: #0353b8;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
 @media (max-width: 768px) {
     .drawing-container {
         grid-template-columns: 1fr;
     }
     
     .reference-panel {
-        padding: 16px;
+        padding: 12px;
     }
     
     .reference-char {
-        font-size: 4rem;
-        margin-bottom: 12px;
+        font-size: 3rem;
+        margin-bottom: 8px;
+    }
+    
+    .reference-overlay {
+        font-size: 200px;
     }
     
     .main-content {
@@ -467,5 +464,9 @@ body {
     
     .setup-screen h1 {
         font-size: 1.8rem;
+    }
+    
+    .donate-panel {
+        width: 300px;
     }
 }

@@ -32,7 +32,7 @@
 <body>
     <header class="header">
         <div class="logo">
-            <img src="favicon.png" alt="LucFont Logo" width="40" height="40">
+            <img src="favicon.png" alt="LucFont Logo" width="40" height="40" id="headerLogo">
             <span>LucFont</span>
         </div>
         <div class="header-controls">
@@ -41,13 +41,34 @@
         </div>
     </header>
 
+    <div id="donatePanel" class="donate-panel">
+        <div class="donate-content">
+            <h2>Support LucFont</h2>
+            <div class="crypto-address">
+                <h3>ETH/USDT (ERC-20)</h3>
+                <p class="address">0xFa78966938743C9168abFC2acD6D7751d7dA35Cf</p>
+                <button class="copy-btn" data-address="0xFa78966938743C9168abFC2acD6D7751d7dA35Cf">Copy</button>
+            </div>
+            <div class="crypto-address">
+                <h3>BTC (Bitcoin mainnet)</h3>
+                <p class="address">bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp</p>
+                <button class="copy-btn" data-address="bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp">Copy</button>
+            </div>
+            <div class="crypto-address">
+                <h3>TON/USDT (The Open Network)</h3>
+                <p class="address">UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF</p>
+                <button class="copy-btn" data-address="UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF">Copy</button>
+            </div>
+        </div>
+    </div>
+
     <main class="main-content">
         <div id="setupScreen" class="setup-screen">
             <h1>Draw your own font</h1>
-            <p>Select a character set to begin</p>
+            <p>Select character sets to include</p>
             
             <div class="charset-grid" id="charsetGrid">
-                <button class="charset-btn active" data-charset="english">
+                <button class="charset-btn" data-charset="english">
                     <span class="charset-icon">Aa</span>
                     <span class="charset-name">English</span>
                 </button>
@@ -85,15 +106,19 @@
                 <div class="reference-panel">
                     <h3>Reference</h3>
                     <div class="reference-char" id="referenceChar">A</div>
-                    <p class="reference-hint">Draw this character in the canvas</p>
+                    <p class="reference-hint">Trace over the reference</p>
                 </div>
                 
                 <div class="drawing-area">
                     <div class="drawing-toolbar">
                         <button id="clearBtn" class="tool-btn">Clear</button>
                         <button id="undoBtn" class="tool-btn">Undo</button>
+                        <button id="toggleReferenceBtn" class="tool-btn">Hide Reference</button>
                     </div>
-                    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+                    <div class="canvas-wrapper">
+                        <canvas id="drawingCanvas" width="500" height="500"></canvas>
+                        <div id="referenceOverlay" class="reference-overlay">A</div>
+                    </div>
                 </div>
             </div>
             
@@ -105,32 +130,6 @@
             </div>
         </div>
     </main>
-
-    <div id="donateModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeModal">&times;</span>
-            <h2>Support LucFont</h2>
-            <p>Choose your preferred cryptocurrency:</p>
-            
-            <div class="crypto-address">
-                <h3>ETH/USDT (ERC-20)</h3>
-                <p class="address">0xFa78966938743C9168abFC2acD6D7751d7dA35Cf</p>
-                <button class="copy-btn" data-address="0xFa78966938743C9168abFC2acD6D7751d7dA35Cf">Copy</button>
-            </div>
-            
-            <div class="crypto-address">
-                <h3>BTC (Bitcoin mainnet)</h3>
-                <p class="address">bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp</p>
-                <button class="copy-btn" data-address="bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp">Copy</button>
-            </div>
-            
-            <div class="crypto-address">
-                <h3>TON/USDT (The Open Network)</h3>
-                <p class="address">UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF</p>
-                <button class="copy-btn" data-address="UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF">Copy</button>
-            </div>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>
