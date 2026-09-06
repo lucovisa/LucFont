@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LucFont - Font Generator</title>
+    <title>LucFont</title>
     <meta name="description" content="Create your own fonts, make fonts, onion font generator. Design custom typefaces online with LucFont.">
-    <meta name="keywords" content="fonts, make font, create font, font generator, onion, LucFont, custom fonts, typeface designer">
+    <meta name="keywords" content="fonts, make font, create font, onion, LucFont, custom fonts, typeface designer">
     <meta name="author" content="LucFont">
     <meta name="robots" content="index, follow">
     
     <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     
-    <meta property="og:title" content="LucFont - Create Your Own Fonts">
+    <meta property="og:title" content="LucFont">
     <meta property="og:description" content="Make fonts, create fonts, onion font generator. Design custom typefaces online with LucFont.">
     <meta property="og:image" content="https://lucovisa.github.io/LucFont/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -23,8 +23,8 @@
     <meta property="og:locale" content="en_US">
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="LucFont - Font Generator">
-    <meta name="twitter:description" content="Create your own fonts. Make fonts, onion font generator online.">
+    <meta name="twitter:title" content="LucFont">
+    <meta name="twitter:description" content="Create your own fonts online.">
     <meta name="twitter:image" content="https://lucovisa.github.io/LucFont/og-image.png">
     
     <link rel="stylesheet" href="style.css">
@@ -42,20 +42,66 @@
     </header>
 
     <main class="main-content">
-        <h1>Font Generator</h1>
-        <p>Draw your own fonts</p>
-        
-        <div class="generator-container">
-            <div class="characters-grid" id="charactersGrid">
+        <div id="setupScreen" class="setup-screen">
+            <h1>Draw your own font</h1>
+            <p>Select a character set to begin</p>
+            
+            <div class="charset-grid" id="charsetGrid">
+                <button class="charset-btn active" data-charset="english">
+                    <span class="charset-icon">Aa</span>
+                    <span class="charset-name">English</span>
+                </button>
+                <button class="charset-btn" data-charset="russian">
+                    <span class="charset-icon">Аа</span>
+                    <span class="charset-name">Русский</span>
+                </button>
+                <button class="charset-btn" data-charset="numbers">
+                    <span class="charset-icon">12</span>
+                    <span class="charset-name">Numbers</span>
+                </button>
+                <button class="charset-btn" data-charset="symbols">
+                    <span class="charset-icon">!?</span>
+                    <span class="charset-name">Symbols</span>
+                </button>
+                <button class="charset-btn" data-charset="custom">
+                    <span class="charset-icon">✏️</span>
+                    <span class="charset-name">Custom</span>
+                </button>
             </div>
             
-            <div class="drawing-area">
-                <div class="drawing-toolbar">
-                    <button id="clearBtn" class="tool-btn">Clear</button>
-                    <button id="undoBtn" class="tool-btn">Undo</button>
-                    <button id="exportBtn" class="tool-btn">Export</button>
+            <div id="customCharsetInput" class="custom-charset-input" style="display: none;">
+                <input type="text" id="customCharset" placeholder="Enter your characters (e.g. ABC123)" maxlength="100">
+            </div>
+            
+            <button id="startBtn" class="start-btn">Start Drawing</button>
+        </div>
+        
+        <div id="drawingScreen" class="drawing-screen" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="drawing-container">
+                <div class="reference-panel">
+                    <h3>Reference</h3>
+                    <div class="reference-char" id="referenceChar">A</div>
+                    <p class="reference-hint">Draw this character in the canvas</p>
                 </div>
-                <canvas id="drawingCanvas" width="500" height="500"></canvas>
+                
+                <div class="drawing-area">
+                    <div class="drawing-toolbar">
+                        <button id="clearBtn" class="tool-btn">Clear</button>
+                        <button id="undoBtn" class="tool-btn">Undo</button>
+                    </div>
+                    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button id="prevBtn" class="nav-btn">Previous</button>
+                <span id="charCounter" class="char-counter">1 / 26</span>
+                <button id="nextBtn" class="nav-btn">Next</button>
+                <button id="finishBtn" class="nav-btn finish-btn" style="display: none;">Finish</button>
             </div>
         </div>
     </main>

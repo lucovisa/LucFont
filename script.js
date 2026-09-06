@@ -1,9 +1,19 @@
-const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'.split('');
-let selectedCharacter = null;
+const charsets = {
+    english: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    russian: 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+    numbers: '0123456789',
+    symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?/~`'
+};
+
+let selectedCharset = 'english';
+let customCharset = '';
+let currentCharacters = [];
+let currentIndex = 0;
 let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 let drawingHistory = [];
+let fontData = {};
 
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
@@ -17,27 +27,56 @@ function initCanvas() {
     ctx.lineJoin = 'round';
 }
 
-function createCharactersGrid() {
-    const grid = document.getElementById('charactersGrid');
-    characters.forEach(char => {
-        const btn = document.createElement('button');
-        btn.className = 'character-btn';
-        btn.textContent = char;
-        btn.dataset.character = char;
-        btn.addEventListener('click', () => selectCharacter(char, btn));
-        grid.appendChild(btn);
+function selectCharset(charset) {
+    selectedCharset = charset;
+    document.querySelectorAll('.charset-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.charset === charset) {
+            btn.classList.add('active');
+        }
     });
+    
+    if (charset === 'custom') {
+        document.getElementById('customCharsetInput').style.display = 'block';
+    } else {
+        document.getElementById('customCharsetInput').style.display = 'none';
+    }
 }
 
-function selectCharacter(char, btn) {
-    document.querySelectorAll('.character-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedCharacter = char;
+function startDrawing() {
+    if (selectedCharset === 'custom') {
+        customCharset = document.getElementById('customCharset').value.trim();
+        if (!customCharset) {
+            alert('Please enter your custom characters');
+            return;
+        }
+        currentCharacters = customCharset.split('');
+    } else {
+        currentCharacters = charsets[selectedCharset].split('');
+    }
+    
+    currentIndex = 0;
+    fontData = {};
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('drawingScreen').style.display = 'block';
+    showCharacter();
+}
+
+function showCharacter() {
+    const char = currentCharacters[currentIndex];
+    document.getElementById('referenceChar').textContent = char;
+    document.getElementById('charCounter').textContent = `${currentIndex + 1} / ${currentCharacters.length}`;
+    document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCharacters.length) * 100}%`;
+    
+    document.getElementById('prevBtn').style.display = currentIndex === 0 ? 'none' : 'block';
+    document.getElementById('nextBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
+    document.getElementById('finishBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'block' : 'none';
+    
     loadCharacterDrawing(char);
 }
 
 function loadCharacterDrawing(char) {
-    const saved = localStorage.getItem(`lucfont-char-${char}`);
+    const saved = fontData[char] || localStorage.getItem(`lucfont-char-${char}`);
     initCanvas();
     if (saved) {
         const img = new Image();
@@ -51,7 +90,20 @@ function loadCharacterDrawing(char) {
     }
 }
 
-function startDrawing(e) {
+function saveCurrentDrawing() {
+    const char = currentCharacters[currentIndex];
+    if (char) {
+        const dataUrl = canvas.toDataURL();
+        fontData[char] = dataUrl;
+        localStorage.setItem(`lucfont-char-${char}`, dataUrl);
+        drawingHistory.push(dataUrl);
+        if (drawingHistory.length > 20) {
+            drawingHistory.shift();
+        }
+    }
+}
+
+function startDrawingEvent(e) {
     isDrawing = true;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -60,7 +112,7 @@ function startDrawing(e) {
     lastY = (e.clientY - rect.top) * scaleY;
 }
 
-function draw(e) {
+function drawEvent(e) {
     if (!isDrawing) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -78,28 +130,19 @@ function draw(e) {
     lastY = currentY;
 }
 
-function stopDrawing() {
+function stopDrawingEvent() {
     if (isDrawing) {
         isDrawing = false;
         saveCurrentDrawing();
     }
 }
 
-function saveCurrentDrawing() {
-    if (selectedCharacter) {
-        const dataUrl = canvas.toDataURL();
-        localStorage.setItem(`lucfont-char-${selectedCharacter}`, dataUrl);
-        drawingHistory.push(dataUrl);
-        if (drawingHistory.length > 20) {
-            drawingHistory.shift();
-        }
-    }
-}
-
 function clearCanvas() {
     initCanvas();
-    if (selectedCharacter) {
-        localStorage.removeItem(`lucfont-char-${selectedCharacter}`);
+    const char = currentCharacters[currentIndex];
+    if (char) {
+        delete fontData[char];
+        localStorage.removeItem(`lucfont-char-${char}`);
         drawingHistory = [];
     }
 }
@@ -114,39 +157,63 @@ function undoLastStroke() {
             ctx.drawImage(img, 0, 0);
         };
         img.src = previousState;
-        if (selectedCharacter) {
-            localStorage.setItem(`lucfont-char-${selectedCharacter}`, previousState);
+        const char = currentCharacters[currentIndex];
+        if (char) {
+            fontData[char] = previousState;
+            localStorage.setItem(`lucfont-char-${char}`, previousState);
         }
     } else if (drawingHistory.length === 1) {
         clearCanvas();
     }
 }
 
-function exportFont() {
-    const fontData = {};
-    let hasDrawings = false;
+function nextCharacter() {
+    if (currentIndex < currentCharacters.length - 1) {
+        saveCurrentDrawing();
+        currentIndex++;
+        showCharacter();
+    }
+}
+
+function prevCharacter() {
+    if (currentIndex > 0) {
+        saveCurrentDrawing();
+        currentIndex--;
+        showCharacter();
+    }
+}
+
+function finishFont() {
+    saveCurrentDrawing();
     
-    characters.forEach(char => {
+    const fontData = {};
+    currentCharacters.forEach(char => {
         const saved = localStorage.getItem(`lucfont-char-${char}`);
         if (saved) {
             fontData[char] = saved;
-            hasDrawings = true;
         }
     });
     
-    if (!hasDrawings) {
-        alert('No characters drawn yet! Draw some characters first.');
+    if (Object.keys(fontData).length === 0) {
+        alert('No characters drawn!');
         return;
     }
     
-    const jsonData = JSON.stringify(fontData);
+    const jsonData = JSON.stringify({
+        name: 'LucFont Custom',
+        version: '1.0',
+        characters: fontData
+    }, null, 2);
+    
     const blob = new Blob([jsonData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'lucfont-custom-font.json';
+    a.download = 'lucfont-custom.font';
     a.click();
     URL.revokeObjectURL(url);
+    
+    alert('Font saved! This is a JSON file that can be converted to TTF/OTF with font tools.');
 }
 
 function toggleTheme() {
@@ -157,11 +224,16 @@ function toggleTheme() {
     document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
 }
 
+function toggleDonateModal() {
+    const modal = document.getElementById('donateModal');
+    modal.classList.toggle('show');
+}
+
 function copyAddress(address) {
     navigator.clipboard.writeText(address).then(() => {
-        alert('Address copied to clipboard!');
+        alert('Address copied!');
     }).catch(() => {
-        alert('Failed to copy address');
+        alert('Failed to copy');
     });
 }
 
@@ -171,55 +243,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
     
     initCanvas();
-    createCharactersGrid();
     
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
+    document.querySelectorAll('.charset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectCharset(btn.dataset.charset);
+        });
+    });
+    
+    document.getElementById('startBtn').addEventListener('click', startDrawing);
+    
+    canvas.addEventListener('mousedown', startDrawingEvent);
+    canvas.addEventListener('mousemove', drawEvent);
+    canvas.addEventListener('mouseup', stopDrawingEvent);
+    canvas.addEventListener('mouseleave', stopDrawingEvent);
     
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
-        const mouseEvent = new MouseEvent('mousedown', {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        startDrawingEvent({ clientX: touch.clientX, clientY: touch.clientY });
     });
     
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
-        const mouseEvent = new MouseEvent('mousemove', {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        drawEvent({ clientX: touch.clientX, clientY: touch.clientY });
     });
     
-    canvas.addEventListener('touchend', () => {
-        const mouseEvent = new MouseEvent('mouseup');
-        canvas.dispatchEvent(mouseEvent);
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        stopDrawingEvent();
     });
     
     document.getElementById('clearBtn').addEventListener('click', clearCanvas);
     document.getElementById('undoBtn').addEventListener('click', undoLastStroke);
-    document.getElementById('exportBtn').addEventListener('click', exportFont);
+    document.getElementById('nextBtn').addEventListener('click', nextCharacter);
+    document.getElementById('prevBtn').addEventListener('click', prevCharacter);
+    document.getElementById('finishBtn').addEventListener('click', finishFont);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('donateBtn').addEventListener('click', toggleDonateModal);
     
-    const modal = document.getElementById('donateModal');
-    document.getElementById('donateBtn').addEventListener('click', () => {
-        modal.classList.add('show');
-    });
+    document.getElementById('closeModal').addEventListener('click', toggleDonateModal);
     
-    document.getElementById('closeModal').addEventListener('click', () => {
-        modal.classList.remove('show');
-    });
-    
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('show');
+    document.getElementById('donateModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('donateModal')) {
+            toggleDonateModal();
         }
     });
     
