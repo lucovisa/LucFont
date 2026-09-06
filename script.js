@@ -284,9 +284,13 @@ function toggleDonatePanel() {
     panel.classList.toggle('show');
 }
 
-function copyAddress(address) {
+function copyAddress(address, btn) {
     navigator.clipboard.writeText(address).then(() => {
-        alert('Address copied!');
+        const copiedText = btn.parentElement.querySelector('.copied-text');
+        copiedText.classList.add('show');
+        setTimeout(() => {
+            copiedText.classList.remove('show');
+        }, 1500);
     }).catch(() => {
         alert('Failed to copy');
     });
@@ -340,9 +344,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            copyAddress(btn.dataset.address);
+            copyAddress(btn.dataset.address, btn);
         });
     });
     
     updateStartButton();
+    
+    setTimeout(() => {
+        const warningText = document.getElementById('warningText');
+        warningText.classList.add('hidden');
+    }, 15000);
 });
