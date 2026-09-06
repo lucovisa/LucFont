@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LucFont</title>
     <meta name="description" content="Make your own font! Choose any language. Completely anonymous without registration.">
-    <meta name="keywords" content="fonts, make font, create font, LucFont, custom fonts, typeface designer, шрифты, создать шрифт, генератор шрифтов, lucovisa, дизайн шрифта">
+    <meta name="keywords" content="fonts, make font, create font, lucovisa, LucFont, custom fonts, typeface designer">
     <meta name="author" content="LucFont">
     <meta name="robots" content="index, follow">
     
@@ -114,13 +114,24 @@
                     <h3>Reference</h3>
                     <div class="reference-char" id="referenceChar">A</div>
                     <p class="reference-hint">Trace over the reference</p>
+                    <button id="backToSetupBtn" class="tool-btn">Back to selection</button>
                 </div>
                 
                 <div class="drawing-area">
                     <div class="drawing-toolbar">
-                        <button id="clearBtn" class="tool-btn">Clear</button>
-                        <button id="undoBtn" class="tool-btn">Undo</button>
+                        <button id="pencilTool" class="tool-btn active">✏️</button>
+                        <button id="eraserTool" class="tool-btn">🧹</button>
+                        <button id="fillTool" class="tool-btn">🪣</button>
+                        <button id="zoomInBtn" class="tool-btn">🔍+</button>
+                        <button id="zoomOutBtn" class="tool-btn">🔍−</button>
+                        <button id="undoBtn" class="tool-btn">↩️</button>
+                        <button id="clearBtn" class="tool-btn">🗑️</button>
                         <button id="toggleReferenceBtn" class="tool-btn">Hide Reference</button>
+                    </div>
+                    <div class="brush-size-control">
+                        <label for="brushSize">Size:</label>
+                        <input type="range" id="brushSize" min="1" max="100" value="5">
+                        <span id="brushSizeValue">5</span>
                     </div>
                     <div class="canvas-wrapper">
                         <canvas id="drawingCanvas" width="500" height="500"></canvas>
@@ -135,6 +146,13 @@
                 <button id="nextBtn" class="nav-btn">Next</button>
                 <button id="finishBtn" class="nav-btn finish-btn" style="display: none;">Finish</button>
             </div>
+        </div>
+        
+        <div id="doneScreen" class="done-screen" style="display: none;">
+            <h1>Done!</h1>
+            <p>Download your font</p>
+            <button id="downloadBtn" class="start-btn">Download Font</button>
+            <button id="backToSetupFromDone" class="nav-btn">Create Another Font</button>
         </div>
     </main>
 

@@ -15,6 +15,9 @@ let lastY = 0;
 let drawingHistory = [];
 let showReference = true;
 let fontData = {};
+let currentTool = 'pencil';
+let brushSize = 5;
+let zoomLevel = 1;
 
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
@@ -23,7 +26,7 @@ function initCanvas() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 5;
+    ctx.lineWidth = brushSize;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 }
@@ -97,6 +100,7 @@ function startDrawing() {
     fontData = {};
     document.getElementById('setupScreen').style.display = 'none';
     document.getElementById('drawingScreen').style.display = 'block';
+    document.getElementById('doneScreen').style.display = 'none';
     showCharacter();
 }
 
@@ -160,10 +164,21 @@ function drawEvent(e) {
     const currentX = (e.clientX - rect.left) * scaleX;
     const currentY = (e.clientY - rect.top) * scaleY;
     
+    if (currentTool === 'eraser') {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = brushSize * 2;
+    } else {
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = brushSize;
+    }
+    
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(currentX, currentY);
     ctx.stroke();
+    
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = brushSize;
     
     lastX = currentX;
     lastY = currentY;
@@ -174,6 +189,12 @@ function stopDrawingEvent() {
         isDrawing = false;
         saveCurrentDrawing();
     }
+}
+
+function fillCanvas() {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    saveCurrentDrawing();
 }
 
 function clearCanvas() {
@@ -222,6 +243,39 @@ function toggleReference() {
     }
 }
 
+function setTool(tool) {
+    currentTool = tool;
+    document.querySelectorAll('.drawing-toolbar .tool-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const toolMap = {
+        'pencil': 'pencilTool',
+        'eraser': 'eraserTool',
+        'fill': 'fillTool'
+    };
+    
+    if (toolMap[tool]) {
+        document.getElementById(toolMap[tool]).classList.add('active');
+    }
+}
+
+function zoomIn() {
+    zoomLevel = Math.min(zoomLevel + 0.2, 3);
+    applyZoom();
+}
+
+function zoomOut() {
+    zoomLevel = Math.max(zoomLevel - 0.2, 0.5);
+    applyZoom();
+}
+
+function applyZoom() {
+    const wrapper = document.querySelector('.canvas-wrapper');
+    const canvasElement = document.getElementById('drawingCanvas');
+    canvasElement.style.width = `${100 * zoomLevel}%`;
+}
+
 function nextCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
         saveCurrentDrawing();
@@ -241,6 +295,11 @@ function prevCharacter() {
 function finishFont() {
     saveCurrentDrawing();
     
+    document.getElementById('drawingScreen').style.display = 'none';
+    document.getElementById('doneScreen').style.display = 'block';
+}
+
+function downloadFont() {
     const exportData = {};
     currentCharacters.forEach(char => {
         const saved = localStorage.getItem(`lucfont-char-${char}`);
@@ -267,8 +326,12 @@ function finishFont() {
     a.download = 'lucfont-custom.font';
     a.click();
     URL.revokeObjectURL(url);
-    
-    alert('Font saved! This is a JSON file that can be converted to TTF/OTF with font tools.');
+}
+
+function backToSetup() {
+    document.getElementById('drawingScreen').style.display = 'none';
+    document.getElementById('doneScreen').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'block';
 }
 
 function toggleTheme() {
@@ -335,14 +398,31 @@ document.addEventListener('DOMContentLoaded', () => {
         stopDrawingEvent();
     });
     
+    document.getElementById('pencilTool').addEventListener('click', () => setTool('pencil'));
+    document.getElementById('eraserTool').addEventListener('click', () => setTool('eraser'));
+    document.getElementById('fillTool').addEventListener('click', () => {
+        setTool('fill');
+        fillCanvas();
+    });
+    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
     document.getElementById('clearBtn').addEventListener('click', clearCanvas);
     document.getElementById('undoBtn').addEventListener('click', undoLastStroke);
     document.getElementById('toggleReferenceBtn').addEventListener('click', toggleReference);
+    document.getElementById('backToSetupBtn').addEventListener('click', backToSetup);
     document.getElementById('nextBtn').addEventListener('click', nextCharacter);
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
     document.getElementById('finishBtn').addEventListener('click', finishFont);
+    document.getElementById('downloadBtn').addEventListener('click', downloadFont);
+    document.getElementById('backToSetupFromDone').addEventListener('click', backToSetup);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     document.getElementById('donateBtn').addEventListener('click', toggleDonatePanel);
+    
+    document.getElementById('brushSize').addEventListener('input', (e) => {
+        brushSize = parseInt(e.target.value);
+        document.getElementById('brushSizeValue').textContent = brushSize;
+        ctx.lineWidth = brushSize;
+    });
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -354,6 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setTimeout(() => {
         const warningText = document.getElementById('warningText');
-        warningText.classList.add('hidden');
+        warningText.style.animation = 'thanosSnap 0.5s ease-in forwards';
+        setTimeout(() => {
+            warningText.classList.add('hidden');
+        }, 500);
     }, 5000);
 });
