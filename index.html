@@ -122,11 +122,11 @@
                         <button id="pencilTool" class="tool-btn active">✏️</button>
                         <button id="eraserTool" class="tool-btn">🧹</button>
                         <button id="fillTool" class="tool-btn">🪣</button>
-                        <button id="zoomInBtn" class="tool-btn">🔍+</button>
-                        <button id="zoomOutBtn" class="tool-btn">🔍−</button>
                         <button id="undoBtn" class="tool-btn">↩️</button>
                         <button id="clearBtn" class="tool-btn">🗑️</button>
                         <button id="toggleReferenceBtn" class="tool-btn">Hide Reference</button>
+                        <button id="importBtn" class="tool-btn">📥 Import</button>
+                        <button id="exportBtn" class="tool-btn">📤 Export</button>
                     </div>
                     <div class="brush-size-control">
                         <label for="brushSize">Size:</label>
@@ -142,6 +142,7 @@
             
             <div class="navigation-buttons">
                 <button id="prevBtn" class="nav-btn">Previous</button>
+                <button id="skipBtn" class="nav-btn skip-btn">Skip</button>
                 <span id="charCounter" class="char-counter">1 / 26</span>
                 <button id="nextBtn" class="nav-btn">Next</button>
                 <button id="finishBtn" class="nav-btn finish-btn" style="display: none;">Finish</button>
@@ -151,10 +152,17 @@
         <div id="doneScreen" class="done-screen" style="display: none;">
             <h1>Done!</h1>
             <p>Download your font</p>
+            <div class="fill-empty-option">
+                <p>Replace empty characters with defaults?</p>
+                <button id="fillEmptyYes" class="nav-btn">Yes</button>
+                <button id="fillEmptyNo" class="nav-btn">No</button>
+            </div>
             <button id="downloadBtn" class="start-btn">Download Font</button>
             <button id="backToSetupFromDone" class="nav-btn">Create Another Font</button>
         </div>
     </main>
+
+    <input type="file" id="importFile" accept=".font,application/json" style="display: none;">
 
     <script src="script.js"></script>
 </body>

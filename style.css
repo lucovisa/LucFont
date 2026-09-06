@@ -97,26 +97,42 @@ body {
     color: var(--warning-color);
     font-weight: 700;
     text-align: center;
-    animation: thanosSnap 0.5s ease-in forwards;
 }
 
 .warning-text.hidden {
     display: none;
 }
 
-@keyframes thanosSnap {
+.warning-text.dissolving {
+    animation: thanosDissolve 2s ease-in forwards;
+}
+
+@keyframes thanosDissolve {
     0% {
         opacity: 1;
+        filter: none;
         transform: scale(1);
     }
-    50% {
-        opacity: 0.5;
-        transform: scale(0.8);
+    20% {
+        opacity: 0.8;
+        filter: blur(1px);
+    }
+    40% {
+        opacity: 0.6;
+        filter: blur(2px);
+    }
+    60% {
+        opacity: 0.4;
+        filter: blur(3px);
+    }
+    80% {
+        opacity: 0.2;
+        filter: blur(4px);
     }
     100% {
         opacity: 0;
-        transform: scale(0);
-        display: none;
+        filter: blur(5px);
+        transform: scale(0.5);
     }
 }
 
@@ -461,9 +477,9 @@ body {
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    overflow: hidden;
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    overflow: hidden;
 }
 
 #drawingCanvas {
@@ -499,6 +515,7 @@ body {
     gap: 12px;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .nav-btn {
@@ -515,6 +532,20 @@ body {
 
 .nav-btn:hover {
     background-color: var(--button-hover);
+}
+
+.nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.skip-btn {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.skip-btn:hover {
+    background-color: #cc0000;
 }
 
 .finish-btn {
@@ -546,15 +577,37 @@ body {
     color: var(--accent-color);
 }
 
-.done-screen p {
+.done-screen > p {
     font-size: 1.2rem;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
     color: #606060;
 }
 
-.done-screen .start-btn,
-.done-screen .nav-btn {
+.fill-empty-option {
+    margin-bottom: 32px;
+    padding: 16px;
+    background-color: var(--grid-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.fill-empty-option p {
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.fill-empty-option .nav-btn {
     margin: 0 8px;
+}
+
+.fill-empty-option .nav-btn.selected-choice {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.done-screen .start-btn,
+.done-screen > .nav-btn {
+    margin: 8px;
 }
 
 @media (max-width: 768px) {

@@ -17,7 +17,8 @@ let showReference = true;
 let fontData = {};
 let currentTool = 'pencil';
 let brushSize = 5;
-let zoomLevel = 1;
+let fillEmptyChoice = 'yes';
+let hasDrawnCurrent = false;
 
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
@@ -98,6 +99,7 @@ function startDrawing() {
     
     currentIndex = 0;
     fontData = {};
+    hasDrawnCurrent = false;
     document.getElementById('setupScreen').style.display = 'none';
     document.getElementById('drawingScreen').style.display = 'block';
     document.getElementById('doneScreen').style.display = 'none';
@@ -114,6 +116,10 @@ function showCharacter() {
     document.getElementById('prevBtn').style.display = currentIndex === 0 ? 'none' : 'block';
     document.getElementById('nextBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
     document.getElementById('finishBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'block' : 'none';
+    
+    const hasDrawing = !!localStorage.getItem(`lucfont-char-${char}`);
+    hasDrawnCurrent = hasDrawing;
+    document.getElementById('nextBtn').disabled = !hasDrawing;
     
     loadCharacterDrawing(char);
 }
@@ -143,6 +149,8 @@ function saveCurrentDrawing() {
         if (drawingHistory.length > 20) {
             drawingHistory.shift();
         }
+        hasDrawnCurrent = true;
+        document.getElementById('nextBtn').disabled = false;
     }
 }
 
@@ -204,6 +212,8 @@ function clearCanvas() {
         delete fontData[char];
         localStorage.removeItem(`lucfont-char-${char}`);
         drawingHistory = [];
+        hasDrawnCurrent = false;
+        document.getElementById('nextBtn').disabled = true;
     }
 }
 
@@ -260,25 +270,76 @@ function setTool(tool) {
     }
 }
 
-function zoomIn() {
-    zoomLevel = Math.min(zoomLevel + 0.2, 3);
-    applyZoom();
+function importFont() {
+    const fileInput = document.getElementById('importFile');
+    fileInput.click();
+    
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                const characters = data.characters || data;
+                
+                Object.keys(characters).forEach(char => {
+                    localStorage.setItem(`lucfont-char-${char}`, characters[char]);
+                    fontData[char] = characters[char];
+                });
+                
+                alert('Font imported successfully!');
+                showCharacter();
+            } catch (error) {
+                alert('Invalid font file');
+            }
+        };
+        reader.readAsText(file);
+    };
 }
 
-function zoomOut() {
-    zoomLevel = Math.max(zoomLevel - 0.2, 0.5);
-    applyZoom();
+function exportFont() {
+    const char = currentCharacters[currentIndex];
+    const saved = localStorage.getItem(`lucfont-char-${char}`);
+    
+    if (!saved) {
+        alert('No drawing for this character');
+        return;
+    }
+    
+    const exportData = {};
+    exportData[char] = saved;
+    
+    const jsonData = JSON.stringify({
+        name: 'LucFont Single Character',
+        version: '1.0',
+        characters: exportData
+    }, null, 2);
+    
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lucfont-${char}.font`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
-function applyZoom() {
-    const wrapper = document.querySelector('.canvas-wrapper');
-    const canvasElement = document.getElementById('drawingCanvas');
-    canvasElement.style.width = `${100 * zoomLevel}%`;
+function skipCharacter() {
+    if (currentIndex < currentCharacters.length - 1) {
+        currentIndex++;
+        showCharacter();
+    } else {
+        finishFont();
+    }
 }
 
 function nextCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
-        saveCurrentDrawing();
+        if (hasDrawnCurrent) {
+            saveCurrentDrawing();
+        }
         currentIndex++;
         showCharacter();
     }
@@ -286,14 +347,18 @@ function nextCharacter() {
 
 function prevCharacter() {
     if (currentIndex > 0) {
-        saveCurrentDrawing();
+        if (hasDrawnCurrent) {
+            saveCurrentDrawing();
+        }
         currentIndex--;
         showCharacter();
     }
 }
 
 function finishFont() {
-    saveCurrentDrawing();
+    if (hasDrawnCurrent) {
+        saveCurrentDrawing();
+    }
     
     document.getElementById('drawingScreen').style.display = 'none';
     document.getElementById('doneScreen').style.display = 'block';
@@ -316,6 +381,7 @@ function downloadFont() {
     const jsonData = JSON.stringify({
         name: 'LucFont Custom',
         version: '1.0',
+        fillEmpty: fillEmptyChoice,
         characters: exportData
     }, null, 2);
     
@@ -404,12 +470,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTool('fill');
         fillCanvas();
     });
-    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
-    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
     document.getElementById('clearBtn').addEventListener('click', clearCanvas);
     document.getElementById('undoBtn').addEventListener('click', undoLastStroke);
     document.getElementById('toggleReferenceBtn').addEventListener('click', toggleReference);
     document.getElementById('backToSetupBtn').addEventListener('click', backToSetup);
+    document.getElementById('importBtn').addEventListener('click', importFont);
+    document.getElementById('exportBtn').addEventListener('click', exportFont);
+    document.getElementById('skipBtn').addEventListener('click', skipCharacter);
     document.getElementById('nextBtn').addEventListener('click', nextCharacter);
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
     document.getElementById('finishBtn').addEventListener('click', finishFont);
@@ -417,6 +484,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('backToSetupFromDone').addEventListener('click', backToSetup);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     document.getElementById('donateBtn').addEventListener('click', toggleDonatePanel);
+    
+    document.getElementById('fillEmptyYes').addEventListener('click', () => {
+        fillEmptyChoice = 'yes';
+        document.getElementById('fillEmptyYes').classList.add('selected-choice');
+        document.getElementById('fillEmptyNo').classList.remove('selected-choice');
+    });
+    
+    document.getElementById('fillEmptyNo').addEventListener('click', () => {
+        fillEmptyChoice = 'no';
+        document.getElementById('fillEmptyNo').classList.add('selected-choice');
+        document.getElementById('fillEmptyYes').classList.remove('selected-choice');
+    });
     
     document.getElementById('brushSize').addEventListener('input', (e) => {
         brushSize = parseInt(e.target.value);
@@ -431,12 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     updateStartButton();
+    document.getElementById('fillEmptyYes').classList.add('selected-choice');
     
     setTimeout(() => {
         const warningText = document.getElementById('warningText');
-        warningText.style.animation = 'thanosSnap 0.5s ease-in forwards';
+        warningText.classList.add('dissolving');
         setTimeout(() => {
             warningText.classList.add('hidden');
-        }, 500);
+        }, 2000);
     }, 5000);
 });
