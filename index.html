@@ -36,29 +36,55 @@
             <span>LucFont</span>
         </div>
         <div class="header-controls">
-            <div class="language-selector">
-                <select id="languageSelect">
-                    <option value="en">English</option>
-                    <option value="ru">Русский</option>
-                </select>
-            </div>
             <button id="themeToggle" class="theme-toggle">🌙</button>
-            <button id="donateBtn" class="donate-btn">❤️ Donate</button>
+            <button id="donateBtn" class="donate-btn">Donate</button>
         </div>
     </header>
 
     <main class="main-content">
-        <h1 id="mainTitle">Font Generator</h1>
-        <p id="mainDescription">Create your own custom fonts with LucFont</p>
+        <h1>Font Generator</h1>
+        <p>Draw your own fonts</p>
         
-        <div class="generator-placeholder">
-            <p id="placeholderText">Font generator coming soon...</p>
+        <div class="generator-container">
+            <div class="characters-grid" id="charactersGrid">
+            </div>
+            
+            <div class="drawing-area">
+                <div class="drawing-toolbar">
+                    <button id="clearBtn" class="tool-btn">Clear</button>
+                    <button id="undoBtn" class="tool-btn">Undo</button>
+                    <button id="exportBtn" class="tool-btn">Export</button>
+                </div>
+                <canvas id="drawingCanvas" width="500" height="500"></canvas>
+            </div>
         </div>
     </main>
 
-    <footer class="footer">
-        <p id="footerText">© 2024 LucFont. All rights reserved.</p>
-    </footer>
+    <div id="donateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2>Support LucFont</h2>
+            <p>Choose your preferred cryptocurrency:</p>
+            
+            <div class="crypto-address">
+                <h3>ETH/USDT (ERC-20)</h3>
+                <p class="address">0xFa78966938743C9168abFC2acD6D7751d7dA35Cf</p>
+                <button class="copy-btn" data-address="0xFa78966938743C9168abFC2acD6D7751d7dA35Cf">Copy</button>
+            </div>
+            
+            <div class="crypto-address">
+                <h3>BTC (Bitcoin mainnet)</h3>
+                <p class="address">bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp</p>
+                <button class="copy-btn" data-address="bc1q60tvcsw4guyhxa5e3n47eqmj0s3lpxzkxldpvp">Copy</button>
+            </div>
+            
+            <div class="crypto-address">
+                <h3>TON/USDT (The Open Network)</h3>
+                <p class="address">UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF</p>
+                <button class="copy-btn" data-address="UQDsZ_8MkBtjjp-pVa5Fefdg1jtJApOZ7oeFF3WBlLnwQcHF">Copy</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
