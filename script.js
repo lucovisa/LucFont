@@ -332,7 +332,7 @@ function exportFont() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `lucfont-${char}.font`;
+    a.download = `lucfont-${char}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -372,31 +372,91 @@ function finishFont() {
     document.getElementById('doneScreen').style.display = 'block';
 }
 
-function downloadFont() {
-    const exportData = {};
-    currentCharacters.forEach(char => {
-        if (fontData[char]) {
-            exportData[char] = fontData[char];
-        }
+function dataUrlToPath(dataUrl) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 500;
+            tempCanvas.height = 500;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0);
+            
+            const imageData = tempCtx.getImageData(0, 0, 500, 500);
+            const pixels = imageData.data;
+            
+            const path = new opentype.Path();
+            const step = 4;
+            
+            for (let y = 0; y < 500; y += step) {
+                for (let x = 0; x < 500; x += step) {
+                    const index = (y * 500 + x) * 4;
+                    if (pixels[index] < 128) {
+                        const px = (x / 500) * 1000;
+                        const py = 1000 - (y / 500) * 1000;
+                        path.moveTo(px, py);
+                        path.lineTo(px + step, py);
+                        path.lineTo(px + step, py - step);
+                        path.lineTo(px, py - step);
+                        path.close();
+                    }
+                }
+            }
+            
+            resolve(path);
+        };
+        img.src = dataUrl;
     });
+}
+
+async function downloadFont() {
+    if (typeof opentype === 'undefined') {
+        showError('Failed to load font library. Check your internet connection.');
+        return;
+    }
     
-    if (Object.keys(exportData).length === 0 && fillEmptyChoice === 'no') {
+    const drawnChars = Object.keys(fontData);
+    
+    if (drawnChars.length === 0 && fillEmptyChoice === 'no') {
         showError('No characters drawn!');
         return;
     }
     
-    const jsonData = JSON.stringify({
-        name: 'LucFont Custom',
-        version: '1.0',
-        fillEmpty: fillEmptyChoice,
-        characters: exportData
-    }, null, 2);
+    const notdefGlyph = new opentype.Glyph({
+        name: '.notdef',
+        unicode: 0,
+        advanceWidth: 650,
+        path: new opentype.Path()
+    });
     
-    const blob = new Blob([jsonData], { type: 'application/json' });
+    const glyphs = [notdefGlyph];
+    
+    for (const char of drawnChars) {
+        const path = await dataUrlToPath(fontData[char]);
+        const glyph = new opentype.Glyph({
+            name: char,
+            unicode: char.charCodeAt(0),
+            advanceWidth: 1000,
+            path: path
+        });
+        glyphs.push(glyph);
+    }
+    
+    const font = new opentype.Font({
+        familyName: 'LucFont Custom',
+        styleName: 'Regular',
+        unitsPerEm: 1000,
+        ascender: 800,
+        descender: -200,
+        glyphs: glyphs
+    });
+    
+    const ttfArrayBuffer = font.toArrayBuffer();
+    const blob = new Blob([ttfArrayBuffer], { type: 'font/ttf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'lucfont-custom.font';
+    a.download = 'lucfont-custom.ttf';
     a.click();
     URL.revokeObjectURL(url);
 }
