@@ -118,9 +118,12 @@ function showCharacter() {
     document.getElementById('charCounter').textContent = `${currentIndex + 1} / ${currentCharacters.length}`;
     document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCharacters.length) * 100}%`;
     
+    const isLast = currentIndex === currentCharacters.length - 1;
+    
     document.getElementById('prevBtn').style.display = currentIndex === 0 ? 'none' : 'block';
-    document.getElementById('skipBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
-    document.getElementById('nextBtn').style.display = currentIndex === currentCharacters.length - 1 ? 'none' : 'block';
+    document.getElementById('skipBtn').style.display = isLast ? 'none' : 'block';
+    document.getElementById('nextBtn').style.display = isLast ? 'none' : 'block';
+    document.getElementById('continueBtn').style.display = isLast ? 'block' : 'none';
     
     const hasDrawing = !!localStorage.getItem(`lucfont-char-${char}`);
     hasDrawnCurrent = hasDrawing;
@@ -334,8 +337,6 @@ function skipCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
         currentIndex++;
         showCharacter();
-    } else {
-        finishFont();
     }
 }
 
@@ -343,8 +344,6 @@ function nextCharacter() {
     if (currentIndex < currentCharacters.length - 1) {
         currentIndex++;
         showCharacter();
-    } else {
-        finishFont();
     }
 }
 
@@ -479,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('skipBtn').addEventListener('click', skipCharacter);
     document.getElementById('nextBtn').addEventListener('click', nextCharacter);
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
+    document.getElementById('continueBtn').addEventListener('click', finishFont);
     document.getElementById('downloadBtn').addEventListener('click', downloadFont);
     document.getElementById('backToSetupFromDone').addEventListener('click', backToSetup);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);

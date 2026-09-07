@@ -562,6 +562,15 @@ body {
     background-color: var(--button-hover);
 }
 
+.continue-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.continue-btn:hover {
+    background-color: #218838;
+}
+
 .char-counter {
     font-size: 14px;
     color: #606060;
