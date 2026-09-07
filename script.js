@@ -119,21 +119,27 @@ function showCharacter() {
     document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCharacters.length) * 100}%`;
     
     const isLast = currentIndex === currentCharacters.length - 1;
+    const isFirst = currentIndex === 0;
     
     document.getElementById('prevBtn').style.display = 'block';
     document.getElementById('skipBtn').style.display = isLast ? 'none' : 'block';
     document.getElementById('nextBtn').style.display = isLast ? 'none' : 'block';
     document.getElementById('continueBtn').style.display = isLast ? 'block' : 'none';
     
-    const hasDrawing = !!localStorage.getItem(`lucfont-char-${char}`);
-    hasDrawnCurrent = hasDrawing;
-    document.getElementById('nextBtn').disabled = !hasDrawing;
+    if (isFirst) {
+        document.getElementById('prevBtn').textContent = '← Home';
+    } else {
+        document.getElementById('prevBtn').textContent = '← Previous';
+    }
+    
+    hasDrawnCurrent = !!fontData[char];
+    document.getElementById('nextBtn').disabled = !hasDrawnCurrent;
     
     loadCharacterDrawing(char);
 }
 
 function loadCharacterDrawing(char) {
-    const saved = fontData[char] || localStorage.getItem(`lucfont-char-${char}`);
+    const saved = fontData[char];
     initCanvas();
     if (saved) {
         const img = new Image();
@@ -152,7 +158,6 @@ function saveCurrentDrawing() {
     if (char) {
         const dataUrl = canvas.toDataURL();
         fontData[char] = dataUrl;
-        localStorage.setItem(`lucfont-char-${char}`, dataUrl);
         drawingHistory.push(dataUrl);
         if (drawingHistory.length > 20) {
             drawingHistory.shift();
@@ -220,7 +225,6 @@ function clearCanvas() {
     const char = currentCharacters[currentIndex];
     if (char) {
         delete fontData[char];
-        localStorage.removeItem(`lucfont-char-${char}`);
         drawingHistory = [];
         hasDrawnCurrent = false;
         document.getElementById('nextBtn').disabled = true;
@@ -240,7 +244,6 @@ function undoLastStroke() {
         const char = currentCharacters[currentIndex];
         if (char) {
             fontData[char] = previousState;
-            localStorage.setItem(`lucfont-char-${char}`, previousState);
         }
     } else if (drawingHistory.length === 1) {
         clearCanvas();
@@ -295,7 +298,6 @@ function importFont() {
                 const characters = data.characters || data;
                 
                 Object.keys(characters).forEach(char => {
-                    localStorage.setItem(`lucfont-char-${char}`, characters[char]);
                     fontData[char] = characters[char];
                 });
                 
@@ -310,7 +312,7 @@ function importFont() {
 
 function exportFont() {
     const char = currentCharacters[currentIndex];
-    const saved = localStorage.getItem(`lucfont-char-${char}`);
+    const saved = fontData[char];
     
     if (!saved) {
         showError('No drawing for this character');
@@ -356,6 +358,8 @@ function prevCharacter() {
     if (currentIndex > 0) {
         currentIndex--;
         showCharacter();
+    } else {
+        backToSetup();
     }
 }
 
@@ -371,9 +375,8 @@ function finishFont() {
 function downloadFont() {
     const exportData = {};
     currentCharacters.forEach(char => {
-        const saved = localStorage.getItem(`lucfont-char-${char}`);
-        if (saved) {
-            exportData[char] = saved;
+        if (fontData[char]) {
+            exportData[char] = fontData[char];
         }
     });
     
