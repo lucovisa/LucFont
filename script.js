@@ -372,6 +372,13 @@ function finishFont() {
     document.getElementById('doneScreen').style.display = 'block';
 }
 
+function backToDrawing() {
+    document.getElementById('doneScreen').style.display = 'none';
+    document.getElementById('drawingScreen').style.display = 'block';
+    currentIndex = currentCharacters.length - 1;
+    showCharacter();
+}
+
 function dataUrlToPath(dataUrl) {
     return new Promise((resolve) => {
         const img = new Image();
@@ -548,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('prevBtn').addEventListener('click', prevCharacter);
     document.getElementById('continueBtn').addEventListener('click', finishFont);
     document.getElementById('downloadBtn').addEventListener('click', downloadFont);
+    document.getElementById('backToDrawingBtn').addEventListener('click', backToDrawing);
     document.getElementById('backToSetupFromDone').addEventListener('click', backToSetup);
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     document.getElementById('donateBtn').addEventListener('click', toggleDonatePanel);
