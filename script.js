@@ -120,7 +120,7 @@ function showCharacter() {
     
     const isLast = currentIndex === currentCharacters.length - 1;
     
-    document.getElementById('prevBtn').style.display = currentIndex === 0 ? 'none' : 'block';
+    document.getElementById('prevBtn').style.display = 'block';
     document.getElementById('skipBtn').style.display = isLast ? 'none' : 'block';
     document.getElementById('nextBtn').style.display = isLast ? 'none' : 'block';
     document.getElementById('continueBtn').style.display = isLast ? 'block' : 'none';
@@ -203,14 +203,16 @@ function drawEvent(e) {
 function stopDrawingEvent() {
     if (isDrawing) {
         isDrawing = false;
-        saveCurrentDrawing();
+        hasDrawnCurrent = true;
+        document.getElementById('nextBtn').disabled = false;
     }
 }
 
 function fillCanvas() {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    saveCurrentDrawing();
+    hasDrawnCurrent = true;
+    document.getElementById('nextBtn').disabled = false;
 }
 
 function clearCanvas() {
@@ -341,6 +343,9 @@ function skipCharacter() {
 }
 
 function nextCharacter() {
+    if (hasDrawnCurrent) {
+        saveCurrentDrawing();
+    }
     if (currentIndex < currentCharacters.length - 1) {
         currentIndex++;
         showCharacter();
